@@ -1,0 +1,12 @@
+/.vscode
+/trash
+
+*.d
+*.dat
+*.asm
+*.txt
+*.asm
+*.s
+*.exe
+*.bin
+*.out
