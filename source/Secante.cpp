@@ -17,7 +17,8 @@ double Secante::calcular(double x_1, double x_2, Funcao F) const{
         x_2 = x;
         f_de_x = F.imagem(x);
 
-        printf("x_ = %.4lf\t| f(x_) = %.4lf\t|\n", x, f_de_x);
+        
+        std::cout << x << '\t' << f_de_x << std::endl;
 
 
     }while(std::abs(f_de_x) > tolerancia && iteracoesMAX > i++);

@@ -9,7 +9,7 @@ OBJECTS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(CPPFILES))
 all: $(NAME)
 
 run:
-	./CN.out
+	python3 Interface.py
 
 $(NAME): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ -lginac -lcln
