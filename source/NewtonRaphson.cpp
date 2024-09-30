@@ -13,8 +13,7 @@ double NewtonRaphson::calcular(double x, Funcao F) const{
         x = x - (F.imagem(x) / F.derivada(x));
         f_de_x = F.imagem(x);
 
-        
-        std::cout << x << '\t' << f_de_x << std::endl;
+        printf("%d\t %.5lf\t %.5lf \t%.5lf\n", i, x, f_de_x, std::abs(f_de_x) - tolerancia);
 
     }while(std::abs(f_de_x) > tolerancia && iteracoesMAX > i++);
 

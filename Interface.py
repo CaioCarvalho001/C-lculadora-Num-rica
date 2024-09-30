@@ -9,9 +9,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import subprocess
 
 
+global tree 
+tree = None
+
 # Função para forçar o encerramento do programa
 def fechar_programa():
-    sys.exit()        # Encerra o programa
+    sys.exit()
 
 
 # Função para atualizar as opções e os campos
@@ -19,8 +22,9 @@ def atualizar_interface(*args):
     # Limpa o frame das opções dinâmicas
     for widget in frame_opcoes.winfo_children():
         widget.destroy()
+    global tree
+    tree = None
 
-    tabela_existe = False
     menu = ttk.Combobox(frame_opcoes, textvariable=menu_var, values=menu_opcoes)
     menu.pack(pady=10)
 
@@ -45,13 +49,13 @@ def atualizar_interface(*args):
 
         # Exibir intervalos ou valores iniciais conforme o método escolhido
         if opcao_selecionada in ["Bisseção", "Falsa Posição"]:
-            label_a = tk.Label(frame_opcoes, text="Intervalo inicial (a):")
+            label_a = tk.Label(frame_opcoes, text="Inicio do Intervalo [a,b]:")
             label_a.pack()
 
             entrada_a = tk.Entry(frame_opcoes)
             entrada_a.pack(pady=5)
 
-            label_b = tk.Label(frame_opcoes, text="Intervalo final (b):")
+            label_b = tk.Label(frame_opcoes, text="Fim do Intervalo [a,b]:")
             label_b.pack()
             
             entrada_b = tk.Entry(frame_opcoes)
@@ -80,10 +84,52 @@ def atualizar_interface(*args):
             
 
         # Exibir botões de calcular e plotar
-        botao_calcular = tk.Button(frame_opcoes, text="Calcular Zero", command=lambda: [plotar_funcao(entrada_funcao), gerar_tabela(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it)])
+        botao_calcular = tk.Button(frame_opcoes, text="Calcular Zero", command=lambda: validar_calculo(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it))
         botao_calcular.pack(pady=10)
 
-        
+
+def validar_calculo(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it):
+    
+    funcao = entrada_funcao.get() # String do campo função
+    a = entrada_a.get() # String do campo a do intervalo
+    opcao_selecionada = menu_var.get() # String do campo b do intervalo
+    if opcao_selecionada in ["Bisseção", "Falsa Posição", "Secante"]:
+        b = entrada_b.get()
+    else:
+        b = 'None'
+    tol = entrada_tol.get() # String do campo tolerância
+    it = entrada_it.get() # String do campo iteracções
+    
+    # Verificar se todos os campos estao preenchidos
+    strings = [funcao, a, b, tol, it]
+    for s in enumerate(strings, start=1):
+        if not s[1]:
+            messagebox.showerror("Erro", "Cálculo precisa de todos os campos para ser efetuado.")
+            return
+    
+    if(float(tol) >= 1):
+        messagebox.showerror("Erro", "Tolerância tem que ser menor que 1.")
+        return
+    
+    if(int(it) < 0):
+        messagebox.showerror("Erro", "Número de iterações não pode ser negativo.")
+        return
+    
+    # Método escolhido
+    if opcao_selecionada == "Bisseção":
+        op = "1"
+    elif opcao_selecionada == "Falsa Posição":
+        op = "2"
+    elif opcao_selecionada == "Newton-Raphson":
+        op = "3"
+    elif opcao_selecionada == "Secante":
+        op = "4"
+
+    plotar_funcao(entrada_funcao)
+    gerar_tabela(funcao, a, b, tol, it, op)
+    return
+
+
 # Variável simbólica para funções
 x = symbols('x')
 
@@ -109,40 +155,91 @@ def plotar_funcao(entrada_funcao):
     except Exception as e:
         messagebox.showerror("Erro", f"Erro ao plotar função: {e}")
 
-def gerar_tabela(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it):
+def gerar_tabela(funcao, a, b, tol, it, op):
+    global tree
+        
+    args = [op, funcao, tol, it, a, b]
 
-    opcao_selecionada = menu_var.get()
-    if opcao_selecionada in ["Bisseção", "Falsa Posição", "Secante"]:
-        b = entrada_b.get()
-    else:
-        b = '0'
     
-    if opcao_selecionada == "Bisseção":
-        op = "1"
-    elif opcao_selecionada == "Falsa Posição":
-        op = "2"
-    elif opcao_selecionada == "Newton-Raphson":
-        op = "3"
-    elif opcao_selecionada == "Secante":
-        op = "4"
+    if tree == None:
+        # Frame para a tabela (abaixo das opções)
+        frame_tabela = tk.Frame(frame_opcoes)
+        frame_tabela.pack(fill=tk.BOTH, expand=True, pady=10)
+
+
+        if op == '1' or op == '2': # Tabela pra Bisseccao
+
+            tree = ttk.Treeview(frame_tabela, columns=("k", "a", "b", "x", "f(x)", "e"), show="headings")
+            tree.heading("k", text="K")
+            tree.column("k", anchor=tk.CENTER, width=40)
+
+            tree.heading("a", text="a")
+            tree.column("a", anchor=tk.CENTER, width=90)
+
+            tree.heading("b", text="b")
+            tree.column("b", anchor=tk.CENTER, width=90)
+
+            tree.heading("x", text="x")
+            tree.column("x", anchor=tk.CENTER, width=90)
+
+            tree.heading("f(x)", text="f(x)")
+            tree.column("f(x)", anchor=tk.CENTER, width=90)
+
+            tree.heading("e", text="tol")
+            tree.column("e", anchor=tk.CENTER, width=90)
+
+            tree.pack(fill=tk.BOTH, expand=True)
+
+        elif op == '3':
+
+            tree = ttk.Treeview(frame_tabela, columns=("k", "x", "f(x)", "e"), show="headings")
+            tree.heading("k", text="K")
+            tree.column("k", anchor=tk.CENTER, width=10)
+
+            tree.heading("x", text="x")
+            tree.column("x", anchor=tk.CENTER, width=100)
+
+            tree.heading("f(x)", text="f(x)")
+            tree.column("f(x)", anchor=tk.CENTER, width=100)
+
+            tree.heading("e", text="tol")
+            tree.column("e", anchor=tk.CENTER, width=100)
+
+            tree.pack(fill=tk.BOTH, expand=True)
+
+        elif op == '4':
+
+            tree = ttk.Treeview(frame_tabela, columns=("k", "x1", "x2", "x", "f(x)", "e"), show="headings")
+        
+            tree.heading("k", text="K")
+            tree.column("k", anchor=tk.CENTER, width=40)
+
+            tree.heading("x1", text="x1")
+            tree.column("x1", anchor=tk.CENTER, width=90)
+
+            tree.heading("x2", text="x2")
+            tree.column("x2", anchor=tk.CENTER, width=90)
+
+            tree.heading("x", text="x")
+            tree.column("x", anchor=tk.CENTER, width=90)
+        
+            tree.heading("f(x)", text="f(x)")
+            tree.column("f(x)", anchor=tk.CENTER, width=90)
+
+            tree.heading("e", text="tol")
+            tree.column("e", anchor=tk.CENTER, width=90)
+
+            tree.pack(fill=tk.BOTH, expand=True)
+
     
-    args = [op, entrada_funcao.get(), entrada_tol.get(), entrada_it.get(), entrada_a.get(), b]
-    
-   
-    # Frame para a tabela (abaixo das opções)
-    frame_tabela = tk.Frame(frame_opcoes)
-    frame_tabela.pack(fill=tk.BOTH, expand=True, pady=10)
 
     # Criar a tabela (Treeview) dentro do frame de tabela
-    tree = ttk.Treeview(frame_tabela, columns=("x", "f(x)"), show="headings")
-    tree.heading("x", text="x")
-    tree.heading("f(x)", text="f(x)")
-    tree.column("x", anchor=tk.CENTER, width=100)
-    tree.column("f(x)", anchor=tk.CENTER, width=100)
-    tree.pack(fill=tk.BOTH, expand=True)
-
-
-    
+    # tree = ttk.Treeview(frame_tabela, columns=("x", "f(x)"), show="headings")
+    # tree.heading("x", text="x")
+    # tree.heading("f(x)", text="f(x)")
+    # tree.column("x", anchor=tk.CENTER, width=100)
+    # tree.column("f(x)", anchor=tk.CENTER, width=100)
+    # tree.pack(fill=tk.BOTH, expand=True)
 
     try:
         # Executa o script C++ e captura a saída
@@ -157,7 +254,7 @@ def gerar_tabela(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it):
         linhas = output.split('\n')  # Cada linha da tabela
         
         # A primeira linha contém os nomes das colunas, que podemos ignorar
-        for linha in linhas[1:]:
+        for linha in linhas:
             valores = linha.split('\t')  # Os valores são separados por tabulação
             tree.insert("", "end", values=valores)
     
