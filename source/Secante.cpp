@@ -18,7 +18,7 @@ double Secante::calcular(double x_1, double x_2, Funcao F) const{
         f_de_x = F.imagem(x);
 
 
-        printf("%d\t %.5lf\t %.5lf\t %.5lf\t %.5lf\t %.5lf\n", i, x_1, x_2, x, f_de_x, std::abs(f_de_x) - tolerancia);
+        printf("%d\t %.7lf\t %.7lf\t %.7lf\t %.7lf\t %.7lf\n", i, x_1, x_2, x, f_de_x, std::abs(f_de_x) - tolerancia);
         x_1 = x_2;
         x_2 = x;
 

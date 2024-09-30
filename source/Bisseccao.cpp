@@ -26,7 +26,7 @@ double Bisseccao::calcular(double a, double b, Funcao F) const{
         f_de_x = F.imagem(x);
 
 
-        printf("%d\t %.5lf\t %.5lf\t %.5lf\t %.5lf \t%.5lf\n", i, a, b, x, f_de_x, std::abs(f_de_x) - tolerancia);
+        printf("%d\t %.7lf\t %.7lf\t %.7lf\t %.7lf \t%.7lf\n", i, a, b, x, f_de_x, std::abs(f_de_x) - tolerancia);
         
 
         if((f_de_x * F.imagem(a)) > 0){
