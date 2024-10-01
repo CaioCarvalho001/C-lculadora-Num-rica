@@ -10,3 +10,4 @@
 *.exe
 *.bin
 *.out
+__pycache__/

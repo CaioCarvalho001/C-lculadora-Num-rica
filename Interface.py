@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import subprocess
 
+import metodos
+
+
+
+
 # Variável simbólica para funções
 x = symbols('x')
 
@@ -36,6 +41,8 @@ def atualizar_interface(*args):
 
     opcao_selecionada = menu_var.get()
 
+    l = True
+
     if opcao_selecionada:
         # Exibir a entrada da função
         label_funcao = tk.Label(frame_opcoes, text="Insira a função f(x):")
@@ -48,13 +55,15 @@ def atualizar_interface(*args):
         entrada_tol = tk.Entry(frame_opcoes, width=40)
         entrada_tol.pack(pady=5)
 
-        label_it = tk.Label(frame_opcoes, text="Número máximo de iterações:")
-        label_it.pack()
-        entrada_it = tk.Entry(frame_opcoes, width=40)
-        entrada_it.pack(pady=5)
 
         # Exibir intervalos ou valores iniciais conforme o método escolhido
         if opcao_selecionada in ["Bisseção", "Falsa Posição"]:
+            label_it = tk.Label(frame_opcoes, text="Número máximo de iterações:")
+            label_it.pack()
+            entrada_it = tk.Entry(frame_opcoes, width=40)
+            entrada_it.pack(pady=5)
+            
+            
             label_a = tk.Label(frame_opcoes, text="Inicio do Intervalo [a,b]:")
             label_a.pack()
 
@@ -68,6 +77,12 @@ def atualizar_interface(*args):
             entrada_b.pack(pady=5)
 
         elif opcao_selecionada in ["Newton-Raphson"]:
+            label_it = tk.Label(frame_opcoes, text="Número máximo de iterações:")
+            label_it.pack()
+            entrada_it = tk.Entry(frame_opcoes, width=40)
+            entrada_it.pack(pady=5)
+            
+            
             label_a = tk.Label(frame_opcoes, text="Valor inicial (x0):")
             label_a.pack()
 
@@ -78,6 +93,11 @@ def atualizar_interface(*args):
 
 
         elif opcao_selecionada == "Secante":
+            label_it = tk.Label(frame_opcoes, text="Número máximo de iterações:")
+            label_it.pack()
+            entrada_it = tk.Entry(frame_opcoes, width=40)
+            entrada_it.pack(pady=5)
+            
             label_a = tk.Label(frame_opcoes, text="Valor inicial (x0):")
             label_a.pack()
             entrada_a = tk.Entry(frame_opcoes, width=40)
@@ -87,12 +107,111 @@ def atualizar_interface(*args):
             label_b.pack(pady=5)
             entrada_b = tk.Entry(frame_opcoes, width=40)
             entrada_b.pack(pady=5)
+
+        elif opcao_selecionada == "Multiplos Métodos":
+            l = False
+            label_a = tk.Label(frame_opcoes, text="Inicio do Intervalo [a,b]:")
+            label_a.pack()
+
+            entrada_a = tk.Entry(frame_opcoes, width=40)
+            entrada_a.pack(pady=5)
+
+            label_b = tk.Label(frame_opcoes, text="Fim do Intervalo [a,b]:")
+            label_b.pack()
+            
+            entrada_b = tk.Entry(frame_opcoes, width=40)
+            entrada_b.pack(pady=5)
+
+            label_bissec = tk.Label(frame_opcoes, text="Número de iterações para método da Bissecção:")
+            label_bissec.pack()
+
+            entrada_bissec = tk.Entry(frame_opcoes, width=40)
+            entrada_bissec.pack(pady=5)
+
+            label_fp = tk.Label(frame_opcoes, text="Número de iterações para método da Falsa Posição:")
+            label_fp.pack()
+
+            entrada_fp = tk.Entry(frame_opcoes, width=40)
+            entrada_fp.pack(pady=5)
+
+            label_sec = tk.Label(frame_opcoes, text="Número de iterações para método da Secante:")
+            label_sec.pack()
+
+            entrada_sec = tk.Entry(frame_opcoes, width=40)
+            entrada_sec.pack(pady=5)
+
+            label_newton = tk.Label(frame_opcoes, text="Número de iterações para método de Newton-Raphson:")
+            label_newton.pack()
+
+            entrada_newton = tk.Entry(frame_opcoes, width=40)
+            entrada_newton.pack(pady=5)
+            
+            iteracoes = [entrada_bissec, entrada_fp, entrada_sec, entrada_newton]
+            botao_calcular = tk.Button(frame_opcoes, text="Calcular Multilpos Métodos", command=lambda: [multiplos_metodos(entrada_funcao.get(), entrada_a.get(), entrada_b.get(), entrada_tol.get(),iteracoes), plotar_funcao(entrada_funcao)])
+            botao_calcular.pack(pady=10)
             
 
-        # Exibir botões de calcular e plotar
-        botao_calcular = tk.Button(frame_opcoes, text="Calcular Zero", command=lambda: validar_calculo(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it))
-        botao_calcular.pack(pady=10)
+        if l:
+            botao_calcular = tk.Button(frame_opcoes, text="Calcular Zero", command=lambda: validar_calculo(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it))
+            botao_calcular.pack(pady=10)
 
+
+def multiplos_metodos(funcao, a, b, tolerancia, iteracoes):
+    funcao_sympy = sympify(funcao)
+    f = lambda x_val: float(funcao_sympy.subs(x, x_val))
+    df_sympy = diff(funcao_sympy, x)
+    df = lambda x_val: float(df_sympy.subs(x, x_val))
+    inicio = float(a)
+    fim = float(b)
+    tol = float(tolerancia)
+
+    global tree
+    global raiz
+
+    if tree == None:
+        label_resultado = tk.Label(frame_opcoes, text="", font=("Times New Roman", 12, "bold"))
+        label_resultado.pack(pady=10)
+
+        frame_tabela = tk.Frame(frame_opcoes)
+        frame_tabela.pack(fill=tk.BOTH, expand=True, pady=10)
+
+        tree = ttk.Treeview(frame_tabela, columns=("k", "x", "f(x)", "e"), show="headings")
+    
+        tree.heading("k", text="k")
+        tree.column("k", anchor=tk.CENTER, width=20)
+
+        tree.heading("x", text="x")
+        tree.column("x", anchor=tk.CENTER, width=140)
+
+        tree.heading("f(x)", text="f(x)")
+        tree.column("f(x)", anchor=tk.CENTER, width=140)
+    
+        tree.heading("e", text="Erro")
+        tree.column("e", anchor=tk.CENTER, width=140)
+
+        tree.pack(fill=tk.BOTH, expand=True)
+
+    for row in tree.get_children():
+        tree.delete(row)
+    
+    i = 0
+    while i < 4:
+        if i == 0:
+            lista, inicio, fim = metodos.metodosFuncoes.bissectionFunction(f, inicio, fim, tol, int(iteracoes[i].get()))
+        elif i == 1:
+            lista, inicio, fim = metodos.metodosFuncoes.fpFunction(f, inicio, fim, tol, int(iteracoes[i].get()))
+        elif i == 2:
+            lista, inicio, fim = metodos.metodosFuncoes.secant_method(f, inicio, fim, tol, int(iteracoes[i].get()))
+        else:
+            lista = metodos.metodosFuncoes.newtonFunction(f, df, inicio, fim, tol, int(iteracoes[i].get()))
+        
+        for item in lista:
+            tree.insert("", "end", values=item)
+
+        i += 1
+
+    raiz = tree.item(tree.get_children()[-1])["values"][-3]
+    label_resultado.config(text=f"Raiz: {raiz}")
 
 def validar_calculo(entrada_funcao, entrada_a, entrada_b, entrada_tol, entrada_it):
     
@@ -291,7 +410,8 @@ def gerar_tabela(funcao, a, b, tol, it, op):
         raiz = tree.item(tree.get_children()[-1])["values"][-3]
         erro_final = tree.item(tree.get_children()[-1])["values"][-1]
         
-        label_resultado.config(text=f"Raiz: {raiz}, com erro de {erro_final} ---> Iteração {it_raiz}")
+        #label_resultado.config(text=f"Raiz: {raiz}, com erro de {erro_final} ---> Iteração {it_raiz}")
+        label_resultado.config(text=f"Raiz: {raiz}")
     
     except Exception as e:
         print(f"Erro ao executar o script C++: {e}")
@@ -312,7 +432,7 @@ label_metodos = tk.Label(frame_opcoes, text="Métodos:")
 label_metodos.pack()
 
 menu_var = tk.StringVar(value="Escolha um método")
-menu_opcoes = ["Bisseção", "Falsa Posição", "Newton-Raphson", "Secante"]
+menu_opcoes = ["Bisseção", "Falsa Posição", "Newton-Raphson", "Secante", "Multiplos Métodos"]
 menu = ttk.Combobox(frame_opcoes, textvariable=menu_var, values=menu_opcoes)
 menu.pack(pady=10)
 
