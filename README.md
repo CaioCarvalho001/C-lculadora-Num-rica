@@ -64,7 +64,7 @@ Primeiro, clone o repositório do projeto para a sua máquina local:
 
 ```bash
 git clone https://github.com/CaioCarvalho001/Calculadora-Numerica.git
-cd calculadora-raizes
+cd Calculadora-Numerica
 ```
 
 ## Executando o Programa
