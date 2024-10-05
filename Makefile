@@ -7,9 +7,7 @@ CPPFILES = $(foreach D, $(SRC), $(wildcard $(D)/*.cpp))
 OBJECTS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(CPPFILES))
 
 all: $(NAME)
-
-run:
-	python3 Interface.py
+	python3 Interface.py	
 
 $(NAME): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $@ -lginac -lcln

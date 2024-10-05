@@ -13,7 +13,7 @@ import metodos
 
 
 
-# Variável simbólica para funções
+
 x = symbols('x')
 
 global label_resultado 
@@ -21,7 +21,7 @@ global raiz
 global tree 
 tree = None
 
-# Função para forçar o encerramento do programa
+
 def fechar_programa():
     sys.exit()
 
@@ -44,7 +44,8 @@ def atualizar_interface(*args):
     l = True
 
     if opcao_selecionada:
-        # Exibir a entrada da função
+        
+
         label_funcao = tk.Label(frame_opcoes, text="Insira a função f(x):")
         label_funcao.pack()
         entrada_funcao = tk.Entry(frame_opcoes, width=40)
@@ -397,7 +398,7 @@ def gerar_tabela(funcao, a, b, tol, it, op):
         for row in tree.get_children():
             tree.delete(row)
         
-        # Processa a saída do script C++ (quebra as linhas e colunas)
+        # Processa a saída do script C++ 
         linhas = output.split('\n')  # Cada linha da tabela
         
         # A primeira linha contém os nomes das colunas, que podemos ignorar
@@ -410,7 +411,6 @@ def gerar_tabela(funcao, a, b, tol, it, op):
         raiz = tree.item(tree.get_children()[-1])["values"][-3]
         erro_final = tree.item(tree.get_children()[-1])["values"][-1]
         
-        #label_resultado.config(text=f"Raiz: {raiz}, com erro de {erro_final} ---> Iteração {it_raiz}")
         label_resultado.config(text=f"Raiz: {raiz}")
     
     except Exception as e:
